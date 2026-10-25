@@ -137,7 +137,15 @@ class UserSessionsSerializer(serializers.ModelSerializer):
         fields = ["id", "session_id", "title", "description", "created_at", "username"]
 
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+def get_client():
+    load_dotenv(override=True)
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+    try:
+        return genai.Client(api_key=api_key)
+    except Exception:
+        return None
 
 SYSTEM_PROMPT = """
 You are a professional and empathetic customer support assistant.
@@ -208,52 +216,57 @@ class ChatSerializer(serializers.ModelSerializer):
 
         reply = "Sorry, I could not respond right now. Please try again later."
 
-        try:
-            response = client.models.generate_content(
-                model="gemini-3-flash-preview",
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    temperature=0.6,
-                    max_output_tokens=1024,
-                ),
-                contents=conversation,
-            )
+        client = get_client()
+        if not client:
+            reply = "Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file."
+        else:
+            try:
+                model_name = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+                response = client.models.generate_content(
+                    model=model_name,
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        temperature=0.6,
+                        max_output_tokens=1024,
+                    ),
+                    contents=conversation,
+                )
 
-            if response.candidates and len(response.candidates) > 0:
-                reply = "".join(
-                    part.text
-                    for part in response.candidates[0].content.parts
-                    if hasattr(part, "text")
-                ).strip()
-                if not reply:
-                    reply = "I received your message, but couldn't generate a proper response."
-            else:
-                if hasattr(response, "prompt_feedback") and response.prompt_feedback:
-                    block_reason = getattr(
-                        response.prompt_feedback, "block_reason", "UNKNOWN"
-                    )
-                    reply = f"Sorry, I can't assist with this due to content guidelines (Blocked: {block_reason})."
+                if response.candidates and len(response.candidates) > 0:
+                    reply = "".join(
+                        part.text
+                        for part in response.candidates[0].content.parts
+                        if hasattr(part, "text")
+                    ).strip()
+                    if not reply:
+                        reply = "I received your message, but couldn't generate a proper response."
                 else:
-                    reply = "No response generated. Please try rephrasing."
+                    if hasattr(response, "prompt_feedback") and response.prompt_feedback:
+                        block_reason = getattr(
+                            response.prompt_feedback, "block_reason", "UNKNOWN"
+                        )
+                        reply = f"Sorry, I can't assist with this due to content guidelines (Blocked: {block_reason})."
+                    else:
+                        reply = "No response generated. Please try rephrasing."
 
-        except Exception as e:
-            error_msg = str(e).lower()
-            # print("GEMINI API ERROR:", repr(e))
+            except Exception as e:
+                error_msg = str(e).lower()
+                # print("GEMINI API ERROR:", repr(e))
 
-            if (
-                "quota" in error_msg
-                or "resource_exhausted" in error_msg
-                or "429" in error_msg
-            ):
-                reply = "The AI service is temporarily busy due to high demand. Please try again in a few minutes."
-            elif "billing" in error_msg:
-                reply = "AI service requires billing to be enabled. Please contact the administrator."
-            elif "model" in error_msg and "not found" in error_msg:
-                reply = "AI model error. Please check configuration."
-            elif "safety" in error_msg or "blocked" in error_msg:
-                reply = "Sorry, I can't respond due to content safety guidelines."
-            else:
-                reply = "Network error. Please check your connection and try again."
+                if (
+                    "quota" in error_msg
+                    or "resource_exhausted" in error_msg
+                    or "429" in error_msg
+                ):
+                    reply = "The AI service is temporarily busy due to high demand. Please try again in a few minutes."
+                elif "billing" in error_msg:
+                    reply = "AI service requires billing to be enabled. Please contact the administrator."
+                elif "model" in error_msg and "not found" in error_msg:
+                    reply = "AI model error. Please check configuration."
+                elif "safety" in error_msg or "blocked" in error_msg:
+                    reply = "Sorry, I can't respond due to content safety guidelines."
+                else:
+                    reply = "Network error. Please check your connection and try again."
 
         validated_data["response"] = reply
         chat = Chat.objects.create(**validated_data)
@@ -284,9 +297,15 @@ class ChatSerializer(serializers.ModelSerializer):
 
     Title:"""
 
+        client = get_client()
+        if not client:
+            words = first_message.strip().split()
+            return " ".join(words[:5]) if words else "Support Chat"
+
         try:
+            model_name = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
             response = client.models.generate_content(
-                model="gemini-3-flash-preview",
+                model=model_name,
                 config=types.GenerateContentConfig(
                     temperature=0.3,
                     max_output_tokens=20,

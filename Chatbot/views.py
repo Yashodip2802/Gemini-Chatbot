@@ -145,8 +145,17 @@ class ChatCreateView(APIView):
 
     def post(self, request, session_id, *args, **kwargs):
         try:
-            session = Session.objects.get(session_id=session_id, username=request.user)
+            if request.user.is_superuser:
+                session = Session.objects.get(session_id=session_id)
+            else:
+                session = Session.objects.get(session_id=session_id, username=request.user)
         except Session.DoesNotExist:
+            existing = Session.objects.filter(session_id=session_id).first()
+            if existing:
+                return Response(
+                    {"error": f"This chat belongs to user '{existing.username.username}', but you are currently signed in as '{request.user.username}'. Please click '+ New Chat'."},
+                    status=403
+                )
             return Response({"error": "Session not found"}, status=404)
 
         message = request.data.get("message", "").strip()
@@ -199,7 +208,10 @@ def UserChatPage(request, session_id=None):
 
     if session_id:
         try:
-            session = Session.objects.get(session_id=session_id, username=request.user)
+            if request.user.is_superuser:
+                session = Session.objects.get(session_id=session_id)
+            else:
+                session = Session.objects.get(session_id=session_id, username=request.user)
             chats = Chat.objects.filter(session=session).order_by("timestamp")
             context = {
                 "session_id": str(session.session_id),
@@ -228,6 +240,9 @@ class UserSessionsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        sessions = Session.objects.filter(username=request.user).order_by('-created_at')
+        if request.user.is_superuser:
+            sessions = Session.objects.all().order_by('-created_at')
+        else:
+            sessions = Session.objects.filter(username=request.user).order_by('-created_at')
         serializer = SessionSerializer(sessions, many=True)
         return Response(serializer.data, status=200)

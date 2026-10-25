@@ -4,317 +4,520 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up • Gemini Support AI</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <!-- Locomotive Scroll CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.css" />
+
+    <!-- GSAP & Locomotive Scroll -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.js"></script>
+
     <style>
-      body {
-        background: rgb(34, 193, 195);
-        background: linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, #313338);
-        background-attachment: fixed;
+      :root {
+        --bg-dark: #080B11;
+        --card-bg: rgba(18, 24, 38, 0.75);
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --primary-gradient: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%);
+        --primary-glow: rgba(139, 92, 246, 0.4);
+        --text-primary: #F8FAFC;
+        --text-muted: #94A3B8;
+        --text-dim: #64748B;
+        --accent-cyan: #06B6D4;
+        --radius-lg: 24px;
+        --radius-md: 14px;
+      }
+
+      * {
         margin: 0;
-        font-family: "Poppins", sans-serif;
+        padding: 0;
+        box-sizing: border-box;
       }
 
-      #form {
-        width: 400px;
-        margin: 20vh auto 0 auto;
-        background-color: whitesmoke;
-        border-radius: 5px;
-        padding: 30px;
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1rem;
       }
 
-      h1 {
-        text-align: center;
-        color: #313338;
+      /* Animated Glowing Ambient Orbs */
+      .ambient-orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(100px);
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.55;
       }
 
-      #form button {
-        background-color: #313338;
-        color: #e2e3e5;
-        border: 1px solid #313338;
-        border-radius: 5px;
-        padding: 10px;
-        margin: 20px 0px;
-        cursor: pointer;
-        font-size: 20px;
+      .orb-1 {
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, #6366F1 0%, rgba(99, 102, 241, 0) 70%);
+        top: -60px;
+        right: -80px;
+      }
+
+      .orb-2 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, #EC4899 0%, rgba(236, 72, 153, 0) 70%);
+        bottom: -100px;
+        left: -100px;
+      }
+
+      /* Main Auth Wrapper */
+      .auth-container {
         width: 100%;
+        max-width: 520px;
+        padding: 2.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-lg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.15);
+        position: relative;
+        z-index: 10;
+        margin: auto;
+      }
+
+      .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .brand-badge {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-md);
+        background: var(--primary-gradient);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFF;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 25px var(--primary-glow);
+        margin-bottom: 0.85rem;
+      }
+
+      .auth-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.85rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.35rem;
+        background: linear-gradient(135deg, #FFF 40%, var(--text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .auth-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      @media (max-width: 480px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
       }
 
       .input-group {
         display: flex;
         flex-direction: column;
-        margin-bottom: 15px;
+        margin-bottom: 1.15rem;
+        position: relative;
       }
 
-      .input-group input {
-        border-radius: 5px;
-        font-size: 20px;
-        margin-top: 5px;
-        padding: 10px;
-        border: 1px solid rgb(34, 193, 195);
+      .input-label {
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
       }
 
-      .input-group input:focus {
-        outline: 0;
-      }
-
-      .input-group .error {
-        color: rgb(242, 18, 18);
-        font-size: 16px;
-        margin-top: 5px;
-      }
-
-      .input-group.success input {
-        border-color: #0cc477;
-      }
-
-      .input-group.error input {
-        border-color: rgb(206, 67, 67);
-      }
-
-      #signin {
-        background-color: #f5f5f5;
-        color: #313338;
-        width: 100%;
-        font-size: 20px;
+      .input-field-wrapper {
+        position: relative;
         display: flex;
-        justify-content: center;
         align-items: center;
-        text-decoration: none;
-        cursor: pointer;
       }
 
-      #password-suggestions {
-        background: #f1f1f1;
-        border-radius: 5px;
-        padding: 10px;
-        margin-top: 8px;
-      }
-
-      #suggestion-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      #suggestion-list li {
-        background: #fff;
-        padding: 8px;
-        margin-bottom: 5px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-family: monospace;
-      }
-
-      #suggestion-list li:hover {
-        background: #e2e3e5;
-      }
-
-      .password-popup {
+      .input-icon {
         position: absolute;
-        width: 280px;
-        background: #1f1f1f;
-        border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-        display: none;
-        z-index: 9999;
-        padding: 8px 0;
+        left: 1rem;
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        pointer-events: none;
       }
 
-      .popup-item {
+      .input-control {
+        width: 100%;
+        background: rgba(14, 19, 31, 0.7);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-md);
+        padding: 0.8rem 1rem 0.8rem 2.6rem;
+        color: var(--text-primary);
+        font-size: 0.92rem;
+        font-family: inherit;
+        outline: none;
+        transition: all 0.25s ease;
+      }
+
+      .input-control:focus {
+        border-color: rgba(139, 92, 246, 0.6);
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.25);
+        background: rgba(20, 27, 45, 0.85);
+      }
+
+      .password-toggle-btn {
+        position: absolute;
+        right: 1rem;
+        color: var(--text-dim);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+      }
+
+      .password-toggle-btn:hover {
+        color: var(--text-primary);
+      }
+
+      .field-error {
+        color: #F87171;
+        font-size: 0.78rem;
+        margin-top: 0.35rem;
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        cursor: pointer;
+        gap: 0.35rem;
       }
 
-      .popup-item:hover {
-        background: #2a2a2a;
+      /* Password Strength Checklist */
+      .password-criteria-card {
+        background: rgba(14, 19, 31, 0.6);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-md);
+        padding: 0.85rem 1rem;
+        margin-top: 0.35rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
       }
 
-      .popup-item .icon {
-        font-size: 20px;
+      .criteria-item {
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s ease;
       }
 
-      .popup-item .title {
-        color: #ffffff;
-        font-size: 14px;
+      .criteria-item.valid {
+        color: #34D399;
+      }
+
+      .criteria-item i {
+        font-size: 0.8rem;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 0.9rem;
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: var(--radius-md);
+        color: #FFFFFF;
         font-weight: 600;
+        font-size: 1rem;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 6px 22px var(--primary-glow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-top: 0.5rem;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
       }
 
-      .popup-item .password {
-        color: #bdbdbd;
-        font-family: monospace;
-        font-size: 20px;
+      .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px var(--primary-glow);
+      }
+
+      .btn-submit:active {
+        transform: scale(0.98);
+      }
+
+      .auth-footer {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+      }
+
+      .auth-link {
+        color: #A78BFA;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .auth-link:hover {
+        color: #C084FC;
+        text-decoration: underline;
       }
     </style>
-    <title>Sign Up</title>
   </head>
   <body>
-    <form id="form" method="POST">
-      {% csrf_token %}
-      <h1>Sign Up</h1>
+    <!-- Ambient Animated Orbs -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
 
-      {% if signup_success %}
-      <div class="success-message">Signup successfully completed!</div>
-      {% endif %} {% if form.non_field_errors %}
-      <div style="color: red; margin-bottom: 15px">
-        {% for error in form.non_field_errors %}
+    <div class="auth-container">
+      <div class="auth-header">
+        <div class="brand-badge">
+          <i class="fa-solid fa-user-plus"></i>
+        </div>
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Join Gemini AI Customer Support</p>
+      </div>
+
+      {% if non_field_errors %}
+      <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #F87171; padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 1.25rem; font-size: 0.85rem;">
+        {% for error in non_field_errors %}
         <p>{{ error }}</p>
         {% endfor %}
       </div>
-      {% endif %} {% if messages %} {% for message in messages %}
-      <p style="color: red; margin-bottom: 15px">{{ message }}</p>
-      {% endfor %} {% endif %}
+      {% endif %}
 
-      <div class="input-group {% if errors.first_name %}error{% endif %}">
-        <label for="id_first_name">First Name</label>
-        <input
-          id="id_first_name"
-          type="text"
-          name="first_name"
-          value="{{ old_data.first_name|default:'' }}"
-        />
-        {% if errors.first_name %}
-        <div class="error">{{ errors.first_name.0 }}</div>
-        {% endif %}
-      </div>
+      <form id="form" method="POST">
+        {% csrf_token %}
 
-      <div class="input-group {% if errors.last_name %}error{% endif %}">
-        <label for="id_last_name">Last Name</label>
-        <input
-          id="id_last_name"
-          type="text"
-          name="last_name"
-          value="{{ old_data.last_name|default:'' }}"
-        />
-        {% if errors.last_name %}
-        <div class="error">{{ errors.last_name.0 }}</div>
-        {% endif %}
-      </div>
+        <!-- First & Last Name -->
+        <div class="form-row">
+          <div class="input-group">
+            <label class="input-label" for="id_first_name">First Name</label>
+            <div class="input-field-wrapper">
+              <i class="fa-solid fa-id-card input-icon"></i>
+              <input
+                id="id_first_name"
+                class="input-control"
+                type="text"
+                name="first_name"
+                placeholder="John"
+                value="{{ old_data.first_name|default:'' }}"
+                required
+              />
+            </div>
+            {% if errors.first_name %}
+            <div class="field-error">{% for e in errors.first_name %}{{ e }}{% endfor %}</div>
+            {% endif %}
+          </div>
 
-      <div class="input-group {% if errors.username %}error{% endif %}">
-        <label for="id_username">Username</label>
-        <input
-          id="id_username"
-          type="text"
-          name="username"
-          value="{{ old_data.username|default:'' }}"
-        />
-        {% if errors.username %}
-        <div class="error">{{ errors.username.0 }}</div>
-        {% endif %}
-      </div>
-
-      <div class="input-group {% if errors.email %}error{% endif %}">
-        <label for="id_email">Email</label>
-        <input
-          id="id_email"
-          type="text"
-          name="email"
-          value="{{ old_data.email|default:'' }}"
-        />
-        {% if errors.email %}
-        <div class="error">{{ errors.email.0 }}</div>
-        {% endif %}
-      </div>
-
-      <div class="input-group {% if errors.password %}error{% endif %}">
-        <label for="id_password">Password</label>
-        <input id="id_password" type="password" name="password" />
-        {% if errors.password %}
-        <div class="error">{{ errors.password.0 }}</div>
-        {% endif %}
-      </div>
-
-      <div id="password-popup" class="password-popup">
-        <div class="popup-item" onclick="selectPassword(this)">
-          <span class="icon">🔑</span>
-          <div>
-            <div class="title">suggested Password</div>
-            <div class="password"></div>
+          <div class="input-group">
+            <label class="input-label" for="id_last_name">Last Name</label>
+            <div class="input-field-wrapper">
+              <i class="fa-solid fa-id-card input-icon"></i>
+              <input
+                id="id_last_name"
+                class="input-control"
+                type="text"
+                name="last_name"
+                placeholder="Doe"
+                value="{{ old_data.last_name|default:'' }}"
+                required
+              />
+            </div>
+            {% if errors.last_name %}
+            <div class="field-error">{% for e in errors.last_name %}{{ e }}{% endfor %}</div>
+            {% endif %}
           </div>
         </div>
-      </div>
 
-      <div class="input-group {% if errors.confirm_password %}error{% endif %}">
-        <label for="id_confirm_password">Confirm Password</label>
-        <input
-          id="id_confirm_password"
-          type="password"
-          name="confirm_password"
-        />
-        {% if errors.confirm_password %}
-        <div class="error">{{ errors.confirm_password.0 }}</div>
-        {% endif %}
-      </div>
+        <!-- Username -->
+        <div class="input-group">
+          <label class="input-label" for="id_username">Username</label>
+          <div class="input-field-wrapper">
+            <i class="fa-solid fa-at input-icon"></i>
+            <input
+              id="id_username"
+              class="input-control"
+              type="text"
+              name="username"
+              placeholder="johndoe123"
+              value="{{ old_data.username|default:'' }}"
+              required
+            />
+          </div>
+          {% if errors.username %}
+          <div class="field-error">{% for e in errors.username %}{{ e }}{% endfor %}</div>
+          {% endif %}
+        </div>
 
-      <button type="submit">Sign Up</button>
-      <a href="/signinPage/" id="signin">Sign In</a>
-    </form>
+        <!-- Email -->
+        <div class="input-group">
+          <label class="input-label" for="id_email">Email Address</label>
+          <div class="input-field-wrapper">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input
+              id="id_email"
+              class="input-control"
+              type="email"
+              name="email"
+              placeholder="john@example.com"
+              value="{{ old_data.email|default:'' }}"
+              required
+            />
+          </div>
+          {% if errors.email %}
+          <div class="field-error">{% for e in errors.email %}{{ e }}{% endfor %}</div>
+          {% endif %}
+        </div>
+
+        <!-- Password -->
+        <div class="input-group">
+          <label class="input-label" for="id_password">Password</label>
+          <div class="input-field-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input
+              id="id_password"
+              class="input-control"
+              type="password"
+              name="password"
+              placeholder="Create strong password"
+              required
+            />
+            <button type="button" class="password-toggle-btn" id="togglePasswordBtn">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          {% if errors.password %}
+          <div class="field-error">{% for e in errors.password %}{{ e }}{% endfor %}</div>
+          {% endif %}
+        </div>
+
+        <!-- Realtime Password Criteria -->
+        <div class="password-criteria-card" id="passwordCriteria">
+          <div class="criteria-item" id="crit-len">
+            <i class="fa-regular fa-circle"></i> At least 8 characters
+          </div>
+          <div class="criteria-item" id="crit-upper">
+            <i class="fa-regular fa-circle"></i> One uppercase letter (A-Z)
+          </div>
+          <div class="criteria-item" id="crit-lower">
+            <i class="fa-regular fa-circle"></i> One lowercase letter (a-z)
+          </div>
+          <div class="criteria-item" id="crit-num">
+            <i class="fa-regular fa-circle"></i> One number (0-9)
+          </div>
+          <div class="criteria-item" id="crit-spec">
+            <i class="fa-regular fa-circle"></i> One special character (!@#$%^&*)
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="input-group">
+          <label class="input-label" for="id_confirm_password">Confirm Password</label>
+          <div class="input-field-wrapper">
+            <i class="fa-solid fa-shield-halved input-icon"></i>
+            <input
+              id="id_confirm_password"
+              class="input-control"
+              type="password"
+              name="confirm_password"
+              placeholder="Re-enter password"
+              required
+            />
+          </div>
+          {% if errors.confirm_password %}
+          <div class="field-error">{% for e in errors.confirm_password %}{{ e }}{% endfor %}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <span>Create Account</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <div class="auth-footer">
+          Already have an account? 
+          <a href="/signinPage/" class="auth-link">Sign In</a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Password toggle
+        const toggleBtn = document.getElementById("togglePasswordBtn");
+        const passwordInput = document.getElementById("id_password");
+        if (toggleBtn && passwordInput) {
+          toggleBtn.addEventListener("click", () => {
+            const isPassword = passwordInput.type === "password";
+            passwordInput.type = isPassword ? "text" : "password";
+            toggleBtn.innerHTML = isPassword ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+          });
+        }
+
+        // Realtime Password criteria checking
+        if (passwordInput) {
+          passwordInput.addEventListener("input", () => {
+            const val = passwordInput.value;
+            checkCriteria("crit-len", val.length >= 8);
+            checkCriteria("crit-upper", /[A-Z]/.test(val));
+            checkCriteria("crit-lower", /[a-z]/.test(val));
+            checkCriteria("crit-num", /[0-9]/.test(val));
+            checkCriteria("crit-spec", /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val));
+          });
+        }
+
+        function checkCriteria(id, isValid) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.toggle("valid", isValid);
+          el.querySelector("i").className = isValid ? "fa-solid fa-circle-check" : "fa-regular fa-circle";
+        }
+
+        // GSAP Animations
+        if (typeof gsap !== 'undefined') {
+          gsap.to(".orb-1", { x: -30, y: 35, duration: 7, repeat: -1, yoyo: true, ease: "sine.inOut" });
+          gsap.to(".orb-2", { x: 40, y: -30, duration: 8, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+          const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+          tl.from(".auth-container", { scale: 0.94, opacity: 0, y: 30, duration: 0.7 });
+          tl.from(".brand-badge", { scale: 0, rotate: -20, duration: 0.5, ease: "back.out(2)" }, "-=0.4");
+          tl.from(".auth-title, .auth-subtitle", { opacity: 0, y: 15, stagger: 0.1, duration: 0.5 }, "-=0.3");
+          tl.from(".form-row, .input-group, .password-criteria-card, .btn-submit, .auth-footer", {
+            opacity: 0, y: 18, stagger: 0.05, duration: 0.4
+          }, "-=0.3");
+        }
+      });
+    </script>
   </body>
-  <script>
-    const passwordInput = document.getElementById("id_password");
-    const popup = document.getElementById("password-popup");
-    const passwordFields = document.querySelectorAll(".password");
-
-    let selectedPassword = ""; // store chosen password
-
-    function generateStrongPassword() {
-      const lower = "abcdefghijklmnopqrstuvwxyz";
-      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      const number = "0123456789";
-      const special = "!@#$%^&*";
-      const all = lower + upper + number + special;
-
-      let pass =
-        lower[Math.floor(Math.random() * lower.length)] +
-        upper[Math.floor(Math.random() * upper.length)] +
-        number[Math.floor(Math.random() * number.length)] +
-        special[Math.floor(Math.random() * special.length)];
-
-      for (let i = 4; i < 8; i++) {
-        pass += all[Math.floor(Math.random() * all.length)];
-      }
-
-      return pass
-        .split("")
-        .sort(() => 0.5 - Math.random())
-        .join("");
-    }
-
-    function showPopup() {
-      const rect = passwordInput.getBoundingClientRect();
-      popup.style.top = rect.bottom + window.scrollY + 5 + "px";
-      popup.style.left = rect.left + "px";
-
-      if (selectedPassword) {
-        passwordFields.forEach((p) => (p.textContent = selectedPassword));
-      }
-      else {
-        passwordFields.forEach(
-          (p) => (p.textContent = generateStrongPassword())
-        );
-      }
-
-      popup.style.display = "block";
-    }
-
-    function selectPassword(el) {
-      selectedPassword = el.querySelector(".password").textContent;
-      passwordInput.value = selectedPassword;
-      popup.style.display = "none";
-    }
-
-    passwordInput.addEventListener("focus", showPopup);
-
-    passwordInput.addEventListener("input", () => {
-      selectedPassword = "";
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!popup.contains(e.target) && e.target !== passwordInput) {
-        popup.style.display = "none";
-      }
-    });
-  </script>
 </html>

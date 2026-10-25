@@ -4,77 +4,239 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customer Support Chatbot</title>
+    <title>{{ session_title|default:"Customer Support AI" }} • Gemini Chat</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <!-- Locomotive Scroll CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.css" />
+    
+    <!-- Code Highlight CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    
+    <!-- GSAP & Scroll Plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.js"></script>
+    
+    <!-- Markdown & Code Highlight -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <!-- Main Script -->
     <script src="{% static 'js/script.js' %}" defer></script>
   </head>
   <body>
-    <header class="header">
-      <div class="logo" style="display: flex; align-items: center; gap: 0.6rem">
-        <img
-          src="{% static 'images/logo.png' %}"
-          alt="Logo"
-          width="80"
-          height="60"
-        />
-        <span style="font-weight: 600; font-size: 1.2rem"
-          >Customer Support Chatbot</span
-        >
-      </div>
+    <div class="app-container">
+      
+      <!-- Mobile Overlay -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-      <div style="display: flex; align-items: center; gap: 1rem">
-        <a href="/chat/" class="new-chat-btn" id="new_chat"> + New Chat </a>
-        <a href="/signinPage/" class="signout-btn" id="new_chat"> SignOut </a>
-
-        <button id="ttsToggle" class="voice-button" title="Toggle bot voice">
-          <img src="{% static 'images/speaker.png' %}" class="speaker-icon" />
-        </button>
-
-        <div class="tdnn"><div class="moon"></div></div>
-      </div>
-    </header>
-
-    <div class="chat-box" id="chatBox">
-      {% for chat in chats %}
-      <div class="msg-wrapper user">
-        <div class="timestamp">{{ chat.timestamp|date:"H:i" }}</div>
-        <div class="message">{{ chat.message }}</div>
-        <div class="user-avatar"></div>
-      </div>
-      <div class="msg-wrapper bot">
-        <div class="bot-avatar"></div>
-        <div class="message">{{ chat.response }}</div>
-        <div class="timestamp">{{ chat.timestamp|date:"H:i" }}</div>
-      </div>
-
-      {% endfor %}
-    </div>
-
-    <div class="outer-container-chatform">
-      <form id="chatForm" class="chat-form">
-        <div class="input-wrapper">
-          <input
-            type="text"
-            id="userInput"
-            placeholder="Type your message..."
-            autocomplete="off"
-            required
-          />
-          <button id="voiceBtn" class="chat-mic-btn" type="button"></button>
+      <!-- Left Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="brand-wrapper">
+            <div class="brand-icon">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div class="brand-title">Gemini AI</div>
+          </div>
+          <button class="nav-icon-btn btn-close-sidebar" id="btnCloseSidebar" style="display:none;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
-        <button type="submit" class="send-btn">Send</button>
-      </form>
+
+        <div class="new-chat-action">
+          <a href="/chat/" class="btn-new-chat" id="newChatBtn">
+            <i class="fa-solid fa-plus"></i>
+            <span>New Chat</span>
+          </a>
+        </div>
+
+        <div class="sidebar-search">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="sessionSearchInput" placeholder="Search chats..." autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="session-group-label">Recent Conversations</div>
+
+        <!-- Dynamic Sessions Container -->
+        <div class="sidebar-sessions" id="sidebarSessions">
+          <div class="session-item-placeholder" style="color:var(--text-dim);font-size:0.85rem;padding:0.75rem 0.5rem;">
+            <i class="fa-solid fa-circle-notch fa-spin"></i> Loading chats...
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="user-profile">
+            <div class="user-avatar-badge">
+              {{ request.user.username|first|upper|default:"U" }}
+            </div>
+            <div class="user-info">
+              <span class="user-name">{{ request.user.username|default:"User" }}</span>
+              <span class="user-role">{% if request.user.is_superuser %}Administrator{% else %}Standard User{% endif %}</span>
+            </div>
+          </div>
+          <a href="/signinPage/" class="btn-signout" title="Sign Out">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Chat Surface -->
+      <main class="chat-main">
+        <!-- Modern Navbar -->
+        <header class="chat-navbar">
+          <div class="navbar-left">
+            <button class="btn-toggle-sidebar" id="btnToggleSidebar" title="Toggle Sidebar">
+              <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+            <div class="chat-header-info">
+              <div class="chat-header-title">
+                <span id="headerSessionTitle">{{ session_title|default:"New Chat" }}</span>
+                <span class="badge-ai-model">Gemini 3.5</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="navbar-right">
+            {% if request.user.is_superuser %}
+            <a href="/admin/" target="_blank" class="nav-icon-btn" title="Open Django Admin">
+              <i class="fa-solid fa-shield-halved"></i>
+            </a>
+            {% endif %}
+            
+            <button id="ttsToggle" class="nav-icon-btn" title="Toggle Voice Responses (TTS)">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Modern Theme Switch -->
+            <button class="theme-switch-btn" id="themeSwitchBtn" title="Toggle Theme">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+          </div>
+        </header>
+
+        <!-- Chat Scroll Area -->
+        <div class="chat-scroll-container" id="chatScrollContainer" data-scroll-container>
+          <div class="messages-wrapper" id="chatBox">
+            
+            {% if is_new_chat or not chats %}
+            <!-- Welcome Hero for Empty or New Sessions -->
+            <div class="welcome-hero" id="welcomeHero">
+              <div class="hero-glow-badge">
+                <i class="fa-solid fa-sparkles"></i>
+              </div>
+              <h2 class="hero-title">How can Gemini assist you?</h2>
+              <p class="hero-subtitle">
+                Ask about account issues, platform guidance, technical troubleshooting, or software questions.
+              </p>
+
+              <div class="suggestion-chips-grid">
+                <div class="suggestion-chip" data-prompt="How do I reset my account password?">
+                  <div class="suggestion-icon"><i class="fa-solid fa-key"></i></div>
+                  <div class="suggestion-content">
+                    <h4>Reset Password</h4>
+                    <p>Step-by-step account recovery guidance</p>
+                  </div>
+                </div>
+
+                <div class="suggestion-chip" data-prompt="I am encountering an API connection error, how do I troubleshoot it?">
+                  <div class="suggestion-icon"><i class="fa-solid fa-code"></i></div>
+                  <div class="suggestion-content">
+                    <h4>API Troubleshooting</h4>
+                    <p>Debug connection and authentication issues</p>
+                  </div>
+                </div>
+
+                <div class="suggestion-chip" data-prompt="Where can I update my billing and subscription settings?">
+                  <div class="suggestion-icon"><i class="fa-solid fa-credit-card"></i></div>
+                  <div class="suggestion-content">
+                    <h4>Billing & Invoices</h4>
+                    <p>Manage subscription details and invoices</p>
+                  </div>
+                </div>
+
+                <div class="suggestion-chip" data-prompt="What features does this customer support platform offer?">
+                  <div class="suggestion-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                  <div class="suggestion-content">
+                    <h4>Platform Overview</h4>
+                    <p>Explore tools, capabilities, and workflows</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Message History -->
+            {% for chat in chats %}
+            <!-- User Message -->
+            <div class="msg-wrapper user">
+              <div class="msg-bubble-container">
+                <div class="msg-bubble">{{ chat.message }}</div>
+                <div class="msg-timestamp">{{ chat.timestamp|date:"H:i" }}</div>
+              </div>
+              <div class="msg-avatar">
+                <i class="fa-solid fa-user"></i>
+              </div>
+            </div>
+
+            <!-- Bot Message -->
+            <div class="msg-wrapper bot">
+              <div class="msg-avatar">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <div class="msg-bubble-container">
+                <div class="msg-bubble markdown-body" data-raw-content="{{ chat.response|escapejs }}">{{ chat.response }}</div>
+                <div class="msg-timestamp">{{ chat.timestamp|date:"H:i" }}</div>
+              </div>
+            </div>
+            {% endfor %}
+
+          </div>
+        </div>
+
+        <!-- Floating Prompt Bar -->
+        <div class="chat-dock-container">
+          <form id="chatForm" class="chat-dock">
+            <input
+              type="text"
+              id="userInput"
+              class="dock-input"
+              placeholder="Ask anything or describe your issue..."
+              autocomplete="off"
+              required
+            />
+            
+            <div class="dock-actions">
+              <button id="voiceBtn" class="dock-btn" type="button" title="Speak via Microphone">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              <button type="submit" class="btn-send" id="sendBtn" title="Send message">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </main>
     </div>
 
-    <input
-      type="hidden"
-      id="currentSessionId"
-      value="{{ session_id|default:'None' }}"
-    />
+    <!-- Hidden session state -->
+    <input type="hidden" id="currentSessionId" value="{{ session_id|default:'None' }}" />
 
     <script>
-      {% comment %} const USER_LOGO = "{% static 'images/user-logo.png' %}";
-      const BOT_LOGO = "{% static 'images/bot-logo.png' %}"; {% endcomment %}
       let currentSessionId = document.getElementById("currentSessionId").value;
     </script>
   </body>
